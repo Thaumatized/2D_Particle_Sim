@@ -1,0 +1,8 @@
+#blender stuff
+*.blend1
+
+#compiled stuff
+particle-sim
+
+#vscode
+.vscode/
