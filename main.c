@@ -13,11 +13,11 @@
 #define MAX_PARTICLES (128)
 #define PARTICLE_SPRITE_SIZE (5)
 
-#define PARTICLE_RENDER_SIZE_MIN (10)
-#define PARTICLE_RENDER_SIZE_MAX (25)
+#define PARTICLE_RENDER_SIZE_MIN (20)
+#define PARTICLE_RENDER_SIZE_MAX (30)
 
 #define MASS_MIN (1)
-#define MASS_MAX (10)
+#define MASS_MAX (20)
 
 #define GRAVITATIONAL_CONSTANT (7.0)
 
@@ -63,8 +63,11 @@ struct Vector2 v2Normalized(struct Vector2 v)
 	result.x = 0;
 	result.y = 0;
 	float d = v2Distance(result, v);
-	result.x = v.x / d;
-	result.y = v.y / d;
+	if(d != 0)
+	{
+		result.x = v.x / d;
+		result.y = v.y / d;
+	}
 	return result;
 }
 
@@ -162,7 +165,7 @@ int main()
 		particles[i].vel.y = 0; //randFloat(-1, 1);
 
 		particles[i].heat = 1;
-		particles[i].mass = randFloat(1, 10);
+		particles[i].mass = randFloat(MASS_MIN, MASS_MAX);
 	}
 	
 	while(1)
@@ -193,6 +196,22 @@ int main()
 						v2byf(v2Normalized(v2subv2(particles[i].pos, particles[i2].pos)), gravitationalForce/particles[i2].mass)
 					);
 				}
+
+				//Repulsion when close
+				//float repulsiveForce = -pow(1.1, -v2Distance(particles[i].pos, particles[i2].pos)) * 10 * MASS_MAX;
+				float repulsiveForce = -20 / pow(-v2Distance(particles[i].pos, particles[i2].pos), 3) * MASS_MAX;
+				if(repulsiveForce != INFINITY)
+				{
+					particles[i].vel = v2addv2(
+						particles[i].vel,
+						v2byf(v2Normalized(v2subv2(particles[i2].pos, particles[i].pos)), repulsiveForce/particles[i].mass)
+					);
+					particles[i2].vel = v2addv2(
+						particles[i2].vel,
+						v2byf(v2Normalized(v2subv2(particles[i].pos, particles[i2].pos)), repulsiveForce/particles[i2].mass)
+					);
+				}
+
 			}
 
 			//Movement
