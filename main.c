@@ -10,9 +10,9 @@
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
 
-#define MAX_PARTICLES (512)
+#define MAX_PARTICLES (32)
 #define PARTICLE_SPRITE_SIZE (5)
-#define PARTICLE_RENDER_SIZE (25)
+#define PARTICLE_RENDER_SIZE (5)
 
 #define GRAVITATIONAL_CONSTANT (7.0)
 
@@ -60,6 +60,7 @@ struct Vector2 v2Normalized(struct Vector2 v)
 	float d = v2Distance(result, v);
 	result.x = v.x / d;
 	result.y = v.y / d;
+	return result;
 }
 
 struct Vector2 v2subv2(struct Vector2 a, struct Vector2 b)
@@ -147,10 +148,10 @@ int main()
 		particles[i].pos.x = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE);
 		particles[i].pos.y = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE);
 
-		particles[i].vel.x = 0; //randFloat(-5, 10);
-		particles[i].vel.y = 0; //randFloat(-5, 10);
+		particles[i].vel.x = 0; //randFloat(-1, 1);
+		particles[i].vel.y = 0; //randFloat(-1, 1);
 
-		particles[i].mass = 1;
+		particles[i].mass = randFloat(1, 10);
 		particles[i].heat = 1;
 	}
 	
@@ -165,25 +166,53 @@ int main()
 		//Particle Physics
 		for(int i = 0; i < MAX_PARTICLES; i++)
 		{
-			//Since each particle affects each others, we can start at i and do all interactions both ways.
-			for(int i2 = i; i2 < MAX_PARTICLES; i2++)
+			//Since each particle affects each others, we can start at i+1 and do all interactions both ways.
+			for(int i2 = i+1; i2 < MAX_PARTICLES; i2++)
 			{
 				//Gravity
 				//F = (G * m1 * m2) / d^2
 				float gravitationalForce = (GRAVITATIONAL_CONSTANT * particles[i].mass * particles[i2].mass) / pow(v2Distance(particles[i].pos, particles[i2].pos), 2);
-				particles[i].vel = v2addv2(
-					particles[i].vel,
-				 	v2byf(v2Normalized(v2subv2(particles[i2].pos, particles[i].pos)), gravitationalForce)
-				);
-				particles[i2].vel = v2addv2(
-					particles[i2].vel,
-					v2byf(v2Normalized(v2subv2(particles[i].pos, particles[i2].pos)), gravitationalForce)
-				);
+				if(gravitationalForce != INFINITY) //if the particles are on top of each other this will be infinite. That is no gud :(
+				{
+					particles[i].vel = v2addv2(
+						particles[i].vel,
+						v2byf(v2Normalized(v2subv2(particles[i2].pos, particles[i].pos)), gravitationalForce/particles[i].mass)
+					);
+					particles[i2].vel = v2addv2(
+						particles[i2].vel,
+						v2byf(v2Normalized(v2subv2(particles[i].pos, particles[i2].pos)), gravitationalForce/particles[i2].mass)
+					);
+				}
 			}
 
 			//Movement
+			printf("%i pos (%4.4f, %4.4f)\n", i, particles[i].pos.x, particles[i].pos.y);
+			printf("%i vel (%4.4f, %4.4f)\n", i, particles[i].vel.x, particles[i].vel.y);
 			particles[i].pos = v2addv2(particles[i].pos, particles[i].vel);
-			printf("particle %i pos %6.1f %6.1f vel %6.1f %6.1f\n", i, particles[i].pos.x, particles[i].pos.y, particles[i].vel.x, particles[i].vel.y);
+
+			//Bounds
+			if(particles[i].pos.x < 0)
+			{
+				particles[i].pos.x = 0;
+				particles[i].vel.x *= -1;
+			}
+			if(particles[i].pos.x > WINDOW_X - PARTICLE_RENDER_SIZE)
+			{
+				particles[i].pos.x = WINDOW_X - PARTICLE_RENDER_SIZE;
+				particles[i].vel.x *= -1;
+			}
+			if(particles[i].pos.y < 0)
+			{
+				particles[i].pos.y = 0;
+				particles[i].vel.y *= -1;
+			}
+			if(particles[i].pos.y > WINDOW_Y - PARTICLE_RENDER_SIZE)
+			{
+				particles[i].pos.y = WINDOW_Y - PARTICLE_RENDER_SIZE;
+				particles[i].vel.y *= -1;
+			}
+
+			printf("%i pos (%4.4f, %4.4f)\n", i, particles[i].pos.x, particles[i].pos.y);
 		}
 
 		//Render particles
@@ -197,8 +226,8 @@ int main()
 			SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 			dstrect.x = particles[i].pos.x;
 			dstrect.y = particles[i].pos.y;
-			dstrect.w = PARTICLE_RENDER_SIZE;
-			dstrect.h = PARTICLE_RENDER_SIZE;
+			dstrect.w = PARTICLE_RENDER_SIZE * particles[i].mass;
+			dstrect.h = PARTICLE_RENDER_SIZE * particles[i].mass;
 			SDL_RenderCopy(renderer, texture, NULL, &dstrect);
 		}
 
