@@ -10,9 +10,14 @@
 #define SPRITE_ORIENTATIONS (72)
 #define MAX_FILE_PATH (1024)
 
-#define MAX_PARTICLES (32)
+#define MAX_PARTICLES (128)
 #define PARTICLE_SPRITE_SIZE (5)
-#define PARTICLE_RENDER_SIZE (5)
+
+#define PARTICLE_RENDER_SIZE_MIN (10)
+#define PARTICLE_RENDER_SIZE_MAX (25)
+
+#define MASS_MIN (1)
+#define MASS_MAX (10)
 
 #define GRAVITATIONAL_CONSTANT (7.0)
 
@@ -96,6 +101,11 @@ struct Particle
 	float heat;
 };
 
+int renderSize(float mass)
+{
+	return PARTICLE_RENDER_SIZE_MIN + (PARTICLE_RENDER_SIZE_MAX - PARTICLE_RENDER_SIZE_MIN) * ((mass - MASS_MIN) / (MASS_MAX - MASS_MIN));
+}
+
 int main()
 {
 	srand(time(NULL));
@@ -145,14 +155,14 @@ int main()
 
 	for(int i = 0; i < MAX_PARTICLES; i++)
 	{
-		particles[i].pos.x = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE);
-		particles[i].pos.y = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE);
+		particles[i].pos.x = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE_MAX);
+		particles[i].pos.y = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE_MAX);
 
 		particles[i].vel.x = 0; //randFloat(-1, 1);
 		particles[i].vel.y = 0; //randFloat(-1, 1);
 
-		particles[i].mass = randFloat(1, 10);
 		particles[i].heat = 1;
+		particles[i].mass = randFloat(1, 10);
 	}
 	
 	while(1)
@@ -186,33 +196,29 @@ int main()
 			}
 
 			//Movement
-			printf("%i pos (%4.4f, %4.4f)\n", i, particles[i].pos.x, particles[i].pos.y);
-			printf("%i vel (%4.4f, %4.4f)\n", i, particles[i].vel.x, particles[i].vel.y);
 			particles[i].pos = v2addv2(particles[i].pos, particles[i].vel);
 
 			//Bounds
 			if(particles[i].pos.x < 0)
 			{
 				particles[i].pos.x = 0;
-				particles[i].vel.x *= -1;
+				particles[i].vel.x = 0;
 			}
-			if(particles[i].pos.x > WINDOW_X - PARTICLE_RENDER_SIZE)
+			if(particles[i].pos.x > WINDOW_X - renderSize(particles[i].mass))
 			{
-				particles[i].pos.x = WINDOW_X - PARTICLE_RENDER_SIZE;
-				particles[i].vel.x *= -1;
+				particles[i].pos.x = WINDOW_X - renderSize(particles[i].mass);
+				particles[i].vel.x = 0;
 			}
 			if(particles[i].pos.y < 0)
 			{
 				particles[i].pos.y = 0;
-				particles[i].vel.y *= -1;
+				particles[i].vel.y = 0;
 			}
-			if(particles[i].pos.y > WINDOW_Y - PARTICLE_RENDER_SIZE)
+			if(particles[i].pos.y > WINDOW_Y - renderSize(particles[i].mass))
 			{
-				particles[i].pos.y = WINDOW_Y - PARTICLE_RENDER_SIZE;
-				particles[i].vel.y *= -1;
+				particles[i].pos.y = WINDOW_Y - renderSize(particles[i].mass);
+				particles[i].vel.y = 0;
 			}
-
-			printf("%i pos (%4.4f, %4.4f)\n", i, particles[i].pos.x, particles[i].pos.y);
 		}
 
 		//Render particles
@@ -226,8 +232,8 @@ int main()
 			SDL_SetTextureBlendMode(texture, SDL_BLENDMODE_BLEND);
 			dstrect.x = particles[i].pos.x;
 			dstrect.y = particles[i].pos.y;
-			dstrect.w = PARTICLE_RENDER_SIZE * particles[i].mass;
-			dstrect.h = PARTICLE_RENDER_SIZE * particles[i].mass;
+			dstrect.w = renderSize(particles[i].mass);
+			dstrect.h = renderSize(particles[i].mass);
 			SDL_RenderCopy(renderer, texture, NULL, &dstrect);
 		}
 
