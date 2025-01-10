@@ -221,22 +221,22 @@ int main()
 			if(particles[i].pos.x < 0)
 			{
 				particles[i].pos.x = 0;
-				particles[i].vel.x = 0;
+				particles[i].vel.x = abs(particles[i].vel.x);
 			}
 			if(particles[i].pos.x > WINDOW_X - renderSize(particles[i].mass))
 			{
 				particles[i].pos.x = WINDOW_X - renderSize(particles[i].mass);
-				particles[i].vel.x = 0;
+				particles[i].vel.x = -abs(particles[i].vel.x);
 			}
 			if(particles[i].pos.y < 0)
 			{
 				particles[i].pos.y = 0;
-				particles[i].vel.y = 0;
+				particles[i].vel.y = abs(particles[i].vel.y);
 			}
 			if(particles[i].pos.y > WINDOW_Y - renderSize(particles[i].mass))
 			{
 				particles[i].pos.y = WINDOW_Y - renderSize(particles[i].mass);
-				particles[i].vel.y = 0;
+				particles[i].vel.y = -abs(particles[i].vel.y);
 			}
 		}
 
