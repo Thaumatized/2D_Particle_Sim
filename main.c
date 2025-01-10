@@ -159,7 +159,7 @@ int main()
 	for(int i = 0; i < MAX_PARTICLES; i++)
 	{
 		particles[i].pos.x = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE_MAX);
-		particles[i].pos.y = rand() % (WINDOW_X - PARTICLE_RENDER_SIZE_MAX);
+		particles[i].pos.y = rand() % (WINDOW_Y - PARTICLE_RENDER_SIZE_MAX);
 
 		particles[i].vel.x = 0; //randFloat(-1, 1);
 		particles[i].vel.y = 0; //randFloat(-1, 1);
