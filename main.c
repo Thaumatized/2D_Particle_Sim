@@ -21,6 +21,8 @@
 
 #define GRAVITATIONAL_CONSTANT (7.0)
 
+#define WALL_BOUNCINESS (0.8)
+
 float degsin(float deg) {return 57.2957795*sin(deg*0.0174532925);}
 float degcos(float deg) {return 57.2957795*cos(deg*0.0174532925);}
 float degtan(float deg) {return 57.2957795*tan(deg*0.0174532925);}
@@ -224,21 +226,25 @@ int main()
 			{
 				particles[i].pos.x = 0;
 				particles[i].vel.x = abs(particles[i].vel.x);
+				particles[i].vel = v2byf(particles[i].vel, WALL_BOUNCINESS);
 			}
 			if(particles[i].pos.x > WINDOW_X - renderSize(particles[i].mass))
 			{
 				particles[i].pos.x = WINDOW_X - renderSize(particles[i].mass);
 				particles[i].vel.x = -abs(particles[i].vel.x);
+				particles[i].vel = v2byf(particles[i].vel, WALL_BOUNCINESS);
 			}
 			if(particles[i].pos.y < 0)
 			{
 				particles[i].pos.y = 0;
 				particles[i].vel.y = abs(particles[i].vel.y);
+				particles[i].vel = v2byf(particles[i].vel, WALL_BOUNCINESS);
 			}
 			if(particles[i].pos.y > WINDOW_Y - renderSize(particles[i].mass))
 			{
 				particles[i].pos.y = WINDOW_Y - renderSize(particles[i].mass);
 				particles[i].vel.y = -abs(particles[i].vel.y);
+				particles[i].vel = v2byf(particles[i].vel, WALL_BOUNCINESS);
 			}
 		}
 
