@@ -198,17 +198,19 @@ int main()
 				}
 
 				//Repulsion when close
-				//float repulsiveForce = -pow(1.1, -v2Distance(particles[i].pos, particles[i2].pos)) * 10 * MASS_MAX;
-				float repulsiveForce = -20 / pow(-v2Distance(particles[i].pos, particles[i2].pos), 3) * MASS_MAX;
+				//float repulsiveForce = pow(1.1, -v2Distance(particles[i].pos, particles[i2].pos)) * 10 * MASS_MAX;
+				//float repulsiveForce = -2000 / pow(-v2Distance(particles[i].pos, particles[i2].pos), 3) * MASS_MAX;
+
+				float repulsiveForce = (GRAVITATIONAL_CONSTANT * particles[i].mass * particles[i2].mass) / pow(v2Distance(particles[i].pos, particles[i2].pos), 2.1 ) * 2 - 0.0004;
 				if(repulsiveForce != INFINITY)
 				{
 					particles[i].vel = v2addv2(
 						particles[i].vel,
-						v2byf(v2Normalized(v2subv2(particles[i2].pos, particles[i].pos)), repulsiveForce/particles[i].mass)
+						v2byf(v2Normalized(v2subv2(particles[i].pos, particles[i2].pos)), repulsiveForce/particles[i].mass)
 					);
 					particles[i2].vel = v2addv2(
 						particles[i2].vel,
-						v2byf(v2Normalized(v2subv2(particles[i].pos, particles[i2].pos)), repulsiveForce/particles[i2].mass)
+						v2byf(v2Normalized(v2subv2(particles[i2].pos, particles[i].pos)), repulsiveForce/particles[i2].mass)
 					);
 				}
 
